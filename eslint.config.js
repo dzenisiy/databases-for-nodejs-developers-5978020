@@ -1,17 +1,21 @@
 import globals from "globals";
-import pluginJs from "@eslint/js";
+import js from "@eslint/js";
+import prettierPlugin from "eslint-plugin-prettier";
+import prettierConfig from "eslint-config-prettier";
 
-/** @type {import('eslint').Linter.Config[]} */
+/** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
   {
     languageOptions: {
-      globals: globals.browser // Add browser-specific globals
+      globals: globals.browser, // Add browser-specific globals
     },
-    plugins: ["prettier"], // Add Prettier as a plugin
+    plugins: {
+      prettier: prettierPlugin, // Register Prettier as a plugin
+    },
     rules: {
-      "prettier/prettier": "error" // Treat Prettier formatting issues as ESLint errors
+      ...prettierConfig.rules, // Apply Prettier recommended rules
+      "prettier/prettier": "error", // Treat Prettier formatting issues as ESLint errors
     },
-    extends: ["eslint:recommended", "plugin:prettier/recommended"] // Use recommended Prettier settings
   },
-  pluginJs.configs.recommended
+  js.configs.recommended, // ESLint recommended JavaScript rules
 ];

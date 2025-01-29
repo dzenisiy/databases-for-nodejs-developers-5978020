@@ -5,7 +5,7 @@ export default async function (fastify) {
     const { tag } = request.params;
     // Placeholder items (normally fetched from the database)
     const allItems = [
-      {
+      { 
         id: "1",
         sku: "1001",
         name: "Placeholder Item 1",
@@ -34,7 +34,7 @@ export default async function (fastify) {
         tags: ["Tag2", "Tag3"]
       }
     ];
-
+    
     // Placeholder tags (normally fetched from the database)
     const tags = ["Tag1", "Tag2", "Tag3"];
 
