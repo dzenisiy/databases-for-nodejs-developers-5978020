@@ -10,4 +10,8 @@ const ItemShcema = new mongoose.Schema({
   }
 );
 
+ItemShcema.index({tags: 1});
+ItemShcema.index({name: 1});
+ItemShcema.index({name: "text"});
+
 export const Item = mongoose.model("Item", ItemShcema);
