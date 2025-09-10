@@ -12,7 +12,7 @@ export const config = {
   mysql: {
     uri: "mysql://root:secret@localhost:3306/simpleshop",
     options: {
-      logging: false,
+      logging: false
     }
   },
   redis: {
