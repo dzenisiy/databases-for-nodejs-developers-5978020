@@ -1,16 +1,43 @@
-export default async function (fastify) {
+import { or } from "sequelize";
+import item from "./item.js";
+
+export default async function(fastify) {
   // Route to fetch and display all orders
   fastify.get("/", async (request, reply) => {
     try {
       // TODO: Fetch all orders and their items from the database
       fastify.log.info("Fetching all orders for admin view.");
 
-      const orders = []; // Replace with actual database query
+      const orders = await fastify.models.Order.findAll({
+        include: [
+          {
+            model: fastify.models.OrderItem,
+            as: "items"
+          },
+          {
+            model: fastify.models.User,
+            as: "user",
+            attributes: ["email"]
+          }
+        ]
+      });
+
+      const orderData = orders.map((order) => ({
+        id: order.id,
+        status: order.status,
+        email: order.user?.email || order.email,
+        createdAt: order.createdAt,
+        OrderItems: order.items.map((item) => ({
+          sku: item.sku,
+          qty: item.qty,
+          price: item.price
+        }))
+      }));
 
       return reply.view("admin/orders.ejs", {
         title: "Manage Orders",
         currentPath: "/admin/orders",
-        orders
+        orders: orderData
       });
     } catch (error) {
       request.session.set("messages", [
@@ -32,7 +59,7 @@ export default async function (fastify) {
       // TODO: Fetch the order by ID and update its status to "Shipped"
       fastify.log.info(`Attempting to set order ${orderId} as shipped.`);
 
-      const order = null; // Replace with actual database query
+      const order = await fastify.models.Order.findByPk(orderId);
 
       if (!order) {
         request.session.set("messages", [
@@ -40,6 +67,9 @@ export default async function (fastify) {
         ]);
         return reply.redirect("/admin/orders");
       }
+
+      order.status = "Shipped";
+      order.save();
 
       // TODO: Update the order status to "Shipped"
       fastify.log.info(`Order ${orderId} marked as shipped.`);
