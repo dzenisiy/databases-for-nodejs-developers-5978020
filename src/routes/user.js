@@ -1,3 +1,5 @@
+import * as wasi from "node:wasi";
+
 export default async function (fastify) {
   // GET /login - Render the login form
   fastify.get("/login", async (req, reply) => {
@@ -47,18 +49,27 @@ export default async function (fastify) {
         }
 
         const { email, password } = req.body;
+        const user = await fastify.models.User.findOne({where: {email}});
 
-        // TODO: Replace with real database authentication logic
-        if (email === "test@example.com" && password === "password123") {
-          req.session.set("user", { email }); // Save user data in session
+        if (!user) {
           req.session.set("messages", [
-            { type: "success", text: "Successfully logged in." }
+            { type: "danger", text: "Invalid email or password." }
           ]);
-          return reply.redirect("/");
+          return reply.redirect("/user/login");
         }
 
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+          req.session.set("messages", [
+            { type: "danger", text: "Invalid email or password." }
+          ]);
+          return reply.redirect("/user/login");
+        }
+
+        req.session.set("user", {id: user.id, email: user.email})
+
         req.session.set("messages", [
-          { type: "danger", text: "Invalid email or password." }
+          { type: "success", text: "Login successful" }
         ]);
         return reply.redirect("/user/login");
       } catch (error) {

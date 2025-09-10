@@ -1,4 +1,4 @@
-import { hash } from "argon2";
+import { hash, verify } from "argon2";
 
 export default (sequelize, DataTypes) => {
   const User = sequelize.define("User", {
@@ -22,6 +22,10 @@ export default (sequelize, DataTypes) => {
   User.prototype.setPassword = async function (plainPassword) {
     const hashedPassword = await hash(plainPassword);
     this.password = hashedPassword;
+  }
+
+  User.prototype.comparePassword = async function (plainPassword) {
+    return await verify(this.password, plainPassword);
   }
 
   User.associate = (models) => {
