@@ -19,20 +19,20 @@ export default async function(fastify) {
 
     try {
       if (itemId) {
-        await fastify.Item.findByIdAndUpdate(itemId, {sku, name, price, tags});
+        await fastify.Item.findByIdAndUpdate(itemId, { sku, name, price, tags });
         fastify.log.info(`Updating item ${itemId}:`, { sku, name, price });
       } else {
         await fastify.Item.create({ sku, name, price, tags: parsedTags });
         fastify.log.info(`Created new item ${name}`);
       }
 
-      request.session.set("messages", {
+      request.session.set("messages", [{
         type: "success",
         text: itemId ? "Item updated successfully" : "Item created successfully"
-      });
+      }]);
       return reply.redirect("/admin/item");
     } catch (err) {
-      request.session.set("messages", {type: "danger", text: "Failed to save item"});
+      request.session.set("messages", [{ type: "danger", text: "Failed to save item" }]);
       fastify.log.error("Error saving item");
       return reply.redirect("/admin/item");
     }
@@ -47,12 +47,12 @@ export default async function(fastify) {
     try {
       await fastify.Item.findByIdAndDelete(id);
       fastify.log.info(`Deleting item with id: ${id}`);
-      request.session.set("messages", {
+      request.session.set("messages", [{
         type: "success",
         text: "Item removed"
-      });
+      }]);
     } catch (err) {
-      request.session.set("messages", {type: "danger", text: "Failed to delete item"});
+      request.session.set("messages", [{ type: "danger", text: "Failed to delete item" }]);
       fastify.log.error("Error delete item");
       return reply.redirect("/admin/item");
     }
