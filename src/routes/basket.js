@@ -15,7 +15,7 @@ function basketKey(req) {
   return `mybasket:user:${user.id}:items`;
 }
 
-export default async function (fastify) {
+export default async function(fastify) {
   // Route to display basket contents
   fastify.get("/", async (req, reply) => {
     try {
@@ -25,10 +25,18 @@ export default async function (fastify) {
       // TODO: Fetch basket contents from Redis
       const key = basketKey(req);
       const basket = await fastify.redis.hgetall(key);
-      const items = Object.entries(basket).map(([sku, quantity]) => ({
-        sku,
-        quantity: parseInt(quantity, 10)
-      }));
+
+      const items = await Promise.all(
+        Object.entries(basket).map(async ([sku, quantity]) => {
+          const item = await fastify.Item.findOne({ sku });
+          return {
+            sku,
+            name: item ? item.name : "Unknow Item",
+            price: item ? item.price : "Unknow Price",
+            quantity: parseInt(quantity, 10)
+          };
+        })
+      );
 
       return reply.view("basket.ejs", {
         title: "Your Basket",
