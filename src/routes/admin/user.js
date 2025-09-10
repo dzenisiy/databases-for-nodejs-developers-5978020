@@ -32,11 +32,12 @@ export default async function (fastify) {
           request.session.set("messages", [
             { type: "danger", text: "Failed to find user." }
           ]);
+          return reply.redirect("/admin/user");
         }
 
         user.email = email;
         if (password) {
-          user.password = password;
+          await user.setPassword(password);
         }
 
         await user.save();
